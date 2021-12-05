@@ -1,6 +1,8 @@
 <template>
   <v-container>
-    <Pokemon />
+    <v-row>
+      <Pokemon />
+    </v-row>
   </v-container>
 </template>
 
