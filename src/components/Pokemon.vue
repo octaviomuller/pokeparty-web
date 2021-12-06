@@ -1,7 +1,7 @@
 <template>
-  <v-card class="rounded-bl-0 rounded-xl">
+  <v-card class="rounded-bl-0 rounded-xl my-4">
     <v-card-title style="font-size:2em">
-      #35 - Clefary
+      #{{pokemon.id}} - {{pokemon.name}}
     </v-card-title>
     <div class="ma-5">
       <v-row justify="center" align="center">
@@ -11,16 +11,16 @@
               class="my-6"
               max-width="60%"
               contain
-              src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/35.png"
+              :src="pokemon.image"
             ></v-img>
           </v-row>
           <v-row justify="center">
-            <div class="text-center">
+            <div class="text-center" v-for="(type, index) in pokemon.types" :key="index">
               <v-chip
                 class="ma-2"
-                color="pink"
+                :color="getTypeColor(type)"
               >
-                FAIRY
+                {{ type.toUpperCase() }}
               </v-chip>
             </div>
           </v-row>
@@ -28,58 +28,50 @@
 
         <v-col cols="4">
           <div class="small">
-            <line-chart></line-chart>
+            <Chart :chart-data="datacollection" :options="getChartOptions"></Chart>
           </div>
         </v-col>
 
         <v-col cols="4">
-          <v-card color="secondary" class="my-6 rounded-lg d-flex align-center justify-center" height="11vh">
+          <v-card color="secondary" class="my-6 rounded-lg d-flex align-center justify-center" height="16vh" width="20vw">
             <div>
               <v-row justify="center">
                 <h3>Abilities</h3>
               </v-row>
               <v-row justify="center">
-                <div class="text-center">
+                <div class="text-center" v-for="(ability, index) in pokemon.abilities" :key="index">
                   <v-chip
                     class="ma-2"
                     color="grey"
                   >
-                    cute-charm
-                  </v-chip>
-                </div>
-                <div class="text-center">
-                  <v-chip
-                    class="ma-2"
-                    color="grey"
-                  >
-                    magic-guard
+                    {{ability}}
                   </v-chip>
                 </div>
               </v-row>
             </div>
           </v-card>
 
-          <v-card color="secondary" class="my-6 rounded-lg d-flex align-center justify-center" height="11vh">
+          <v-card color="secondary" class="my-6 rounded-lg d-flex align-center justify-center" height="11vh" width="20vw">
             <div>
               <v-row justify="center">
                 <h3>Height</h3>
               </v-row>
               <v-row justify="center">
                 <div class="text-center">
-                  <h4>40</h4>
+                  <h4>{{pokemon.height}}</h4>
                 </div>
               </v-row>
             </div>
           </v-card>
 
-          <v-card color="secondary" class="my-6 rounded-lg d-flex align-center justify-center" height="11vh">
+          <v-card color="secondary" class="my-6 rounded-lg d-flex align-center justify-center" height="11vh" width="20vw">
             <div>
               <v-row justify="center">
                 <h3>Weight</h3>
               </v-row>
               <v-row justify="center">
                 <div class="text-center">
-                  <h4>40</h4>
+                  <h4>{{pokemon.weight}}</h4>
                 </div>
               </v-row>
             </div>
@@ -91,11 +83,69 @@
 </template>
 
 <script>
-import LineChart from './LineChart.vue'
+import Chart from './Chart.vue'
 
 export default {
+  props: ['pokemon'],
+  data () {
+    return {
+      datacollection: null
+    }
+  },
   components: {
-    LineChart
+    Chart
+  },
+  methods: {
+    getTypeColor (type) {
+      return this.$store.getters.getTypeColor(type)
+    },
+    setDatacollection () {
+      this.datacollection = {
+        labels: [
+          'HP',
+          'Attack',
+          'Defense',
+          'Special Attack',
+          'Special Defense',
+          'Speed'
+        ],
+        datasets: [
+          {
+            data: Object.values(this.pokemon.stats),
+            fill: true,
+            backgroundColor: 'rgba(145, 145, 145, 1)'
+          }
+        ]
+      }
+    }
+  },
+  watch: {
+    pokemon: function () {
+      this.setDatacollection()
+    }
+  },
+  computed: {
+    getChartOptions () {
+      return {
+        legend: {
+          display: false
+        },
+        scales: {
+          yAxes: [{
+            ticks: {
+              min: 0,
+              max: 200,
+              stepSize: 25,
+              reverse: false,
+              beginAtZero: true
+            }
+          }]
+        }
+      }
+    }
+  },
+  mounted () {
+    this.setDatacollection()
   }
 }
 </script>
